@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Navbar dynamically loaded here -->
+    <div id="navbar-container"></div>
+    <script>
+        fetch('navbar.html')
+            .then(response => response.text())
+            .then(data => document.getElementById('navbar-container').innerHTML = data);
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .content {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .portfolio-section {
+            margin-bottom: 1em;
+        }
+
+        .portfolio-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 0.5em;
+            line-height: 1.2em;
+        }
+
+        .portfolio-images {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 45%;
+            margin: 0 auto;
+            height: 600px;
+            cursor: pointer;
+        }
+
+        .image-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+
+        .image-container img.active {
+            display: block;
+        }
+
+        /* Navigation Buttons (Visual Indicators) */
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            color: rgba(0, 0, 0, 0.6);
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.3s;
+            user-select: none;
+            z-index: 2;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 1);
+            color: rgba(0, 0, 0, 0.9);
+        }
+
+        .left-button {
+            left: 5%;
+        }
+
+        .right-button {
+            right: 5%;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .portfolio-images {
+                max-width: 80%; /* Reduce width for mobile */
+                height: 400px; /* Adjust height */
+            }
+
+            .image-container {
+                height: 100%;
+                width: 100%;
+            }
+
+            .portfolio-section h2 {
+                font-size: 20px; /* Reduce heading size */
+                margin-bottom: 1em;
+            }
+
+            .nav-button {
+                font-size: 24px; /* Smaller navigation buttons */
+                padding: 8px 12px;
+            }
+
+            /* Stack portfolio sections vertically on small screens */
+            .portfolio-section {
+                width: 100%;
+                margin: 20px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-images {
+                max-width: 100%; /* Full-width images */
+                height: 300px; /* Further reduced height */
+            }
+
+            .portfolio-section h2 {
+                font-size: 18px; /* Smaller heading for extra small devices */
+            }
+
+            .nav-button {
+                font-size: 18px; /* Even smaller navigation buttons */
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        <!-- Portfolio Sections -->
+        <script>
+            const portfolioItems = [
+                { name: "Corner Bar Table", count: 2 },
+                { name: "Brass Chess Set", count: 3 },
+                { name: "Epoxy Table with Fossils", count: 5 },
+                { name: "City Lights at Night Lamp", count: 4 },                       
+                { name: "Laser Cut Portrait", count: 2 },
+                { name: "Spalted Maple Coffee Table", count: 4 },
+                { name: "Light up Epoxy Table", count: 4 },
+                { name: "Maple Coffee Table with Storage", count: 5 },
+                { name: "Meteorite Wedding Ring", count: 4 },
+                { name: "Model Boat", count: 2 },
+                { name: "Balloon Powered Toy Boats", count: 4 },
+                { name: "Puzzle Board", count: 3 }
+            ];
+
+            portfolioItems.forEach(item => {
+                const itemName = item.name;  
+                const sectionId = itemName.toLowerCase().replace(/\s+/g, '-'); 
+
+                document.write(`
+                    <div class="portfolio-section" id="${sectionId}">
+                        <h2>${item.name}</h2>
+                        <div class="portfolio-images" id="${sectionId}">
+                            <div class="image-container">
+                                <div class="half-click-area left-half" onclick="changeImage('${sectionId}', -1)"></div>
+                                <div class="nav-button left-button" onclick="changeImage('${sectionId}', -1)">&#8592;</div>
+                `);
+                
+                for (let i = 1; i <= item.count; i++) {
+                    const imagePath = `${itemName}_${i}.jpg`;  
+                    document.write(`
+                        <img src="${imagePath}" alt="${item.name} ${i}" class="image-slide">
+                    `);
+                }
+
+                document.write(`
+                                <div class="nav-button right-button" onclick="changeImage('${sectionId}', 1)">&#8594;</div>
+                                <div class="half-click-area right-half" onclick="changeImage('${sectionId}', 1)"></div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        </script>
+    </div>
+
+    <script>
+        // Function to change images when previous/next buttons are clicked
+        function changeImage(sectionId, direction) {
+            var images = document.querySelectorAll(`#${sectionId} .image-slide`);
+            var currentIndex = -1;
+
+            images.forEach((img, index) => {
+                if (img.classList.contains('active')) {
+                    currentIndex = index;
+                    img.classList.remove('active');
+                }
+            });
+
+            if (currentIndex === -1) {
+                currentIndex = 0;
+            }
+
+            var newIndex = currentIndex + direction;
+            if (newIndex < 0) newIndex = images.length - 1;
+            if (newIndex >= images.length) newIndex = 0;
+
+            images[newIndex].classList.add('active');
+        }
+
+        document.querySelectorAll('.portfolio-images').forEach((section) => {
+            const images = section.querySelectorAll('.image-slide');
+            if (images.length > 0) {
+                images[0].classList.add('active');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minerals of Michigan</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Linux Libertine;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #header {
+            width: 0%;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ccc;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #wikipediaButton {
+            position: absolute;
+            top: 5%; /* Position 5% from the top */
+            left: 50%; /* Position 50% from the left */
+            transform: translateX(-50%); /* Center horizontally */
+            width: auto; /* Set the width to auto or a fixed value */
+            background-color: #007BFF;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            z-index: 1000;
+            text-align: center; /* Center text */
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+
+
+
+        #wikipediaButton:hover {
+            background-color: #0056b3;
+        }
+        #leftColumn {
+            width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            border-right: 1px solid #ccc;
+            overflow: hidden;
+            transition: width 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        #leftColumn.open {
+            width: 150px;
+            padding: 10px;
+        }
+
+        #title, #fileContent {
+            display: none;
+        }
+
+        #leftColumn.open #title, #leftColumn.open #fileContent {
+            display: block;
+        }
+
+        #title {
+            width: 100%;
+            padding: 10px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ccc;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+        }
+        #fileContent {
+            width: 100%;
+            height: calc(100vh - 50px);
+            background-color: #ffffff;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+        #centerBox {
+            width: 100vw;
+            height: 100vh;
+            background-color: #a7beb1;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .centerTopBox {
+            flex: 7;
+            background-color: #b0d4b1;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .centerBottomBox {
+            flex: 1;
+            background-color: #9cbba6;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #mapButton {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #007BFF;
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            z-index: 1000;
+            transition: left 0.3s; /* Add transition for smooth movement */
+        }
+        #mapButton:hover {
+            background-color: #0056b3;
+        }
+        .collapsed {
+            width: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <a id="wikipediaButton" href="https://wikipedia.org" target="_blank">Gold</a>
+    </div>
+    <div id="leftColumn">
+        <div id="title">Minerals of Michigan</div>
+        <div id="fileContent">Loading...</div>
+    </div>
+    <div id="centerBox">
+        <div class="centerTopBox">
+            <div id="map"></div>
+        </div>
+        <div class="centerBottomBox">Sources are https://www.michigan.gov/-/media/Project/Websites/egle/Documents/Programs/OGMD/Catalog/04/GIMDL-GGMF.pdf?rev=cc63439f403647f8b2fdf2fbf46bd1ea https://www.openstreetmap.org https://unpkg.com/leaflet/dist/leaflet.js https://wikipedia.org https://gis-michigan.opendata.arcgis.com/datasets/67a8ff23b5f54f15b7133b8c30981441/explore </div>
+    </div>
+    <button id="mapButton">+</button>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    function displayMineralDetails(mineralName) {
+        const bottomBox = document.querySelector('.centerBottomBox');
+
+        csvData.forEach(row => {
+            if (row[0].trim() === mineralName) {
+                const remainingFields = row.slice(2).filter(field => field.trim());
+                const remainingFieldsHtml = remainingFields.join(', ');
+                bottomBox.textContent = remainingFieldsHtml;
+                const countyNames = remainingFields;
+                highlightCounties(countyNames); // Highlight the counties on the map
+                updateTitle(mineralName); // Update the title with the mineral name
+            }
+        });
+    }
+
+    function updateTitle(mineralName) {
+        const wikipediaButton = document.getElementById('wikipediaButton');
+        wikipediaButton.textContent = mineralName;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var leftColumn = document.getElementById('leftColumn');
+        var mapButton = document.getElementById('mapButton');
+
+        // Initial state
+        leftColumn.classList.add('collapsed');
+        mapButton.textContent = '+';
+
+        mapButton.addEventListener('click', function() {
+            if (leftColumn.classList.contains('collapsed')) {
+                leftColumn.classList.remove('collapsed');
+                leftColumn.classList.add('open');
+                mapButton.style.left = '125px';
+                this.textContent = '-';
+            } else {
+                leftColumn.classList.remove('open');
+                leftColumn.classList.add('collapsed');
+                mapButton.style.left = '0px';
+                this.textContent = '+';
+            }
+        });
+    });
+
+    // Initialize the map
+    var map = L.map('map').setView([44.5, -85.5], 5.5); // Center on Michigan with zoom level 7
+
+    // Add a base map layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Paths to your GeoJSON files
+    const countiesUrl = 'Counties_(v17a).geojson';
+
+    let geoJsonLayer;
+
+    function loadGeoJson(url, styleFunction, onEachFeatureFunction, callback) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.features || data.features.length === 0) {
+                    console.error('No features found in the GeoJSON data.');
+                    return;
+                }
+
+                if (geoJsonLayer) {
+                    geoJsonLayer.clearLayers(); // Clear existing layers
+                }
+
+                geoJsonLayer = L.geoJSON(data, {
+                    style: styleFunction,
+                    onEachFeature: onEachFeatureFunction
+                }).addTo(map);
+
+                if (callback) {
+                    callback();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading GeoJSON data:', error);
+            });
+    }
+
+    function showCounties() {
+        loadGeoJson(countiesUrl, feature => ({
+            color: '#3388ff', // Outline color
+            weight: 2, // Outline weight
+            opacity: 0.5, // Outline opacity
+            fillOpacity: 0.1, // Fill opacity
+            fillColor: '#3388ff' // Fill color
+        }), function (feature, layer) {
+            if (feature.properties && feature.properties.NAME) {
+                const countyName = feature.properties.NAME;
+                const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${countyName.replace(' ', '_')}_County,_Michigan&prop=extracts&format=json&exintro&origin=*`;
+
+                layer.bindPopup('<strong>' + countyName + '</strong><br><a href="#" class="wiki-link" data-url="' + wikiUrl + '">Wikipedia</a>');
+
+                layer.on('mouseover', function () {
+                    this.openPopup();
+                });
+
+                layer.on('mouseout', function () {
+                    this.closePopup();
+                });
+
+                // Highlight county on click and display Wikipedia content
+                layer.on('click', function() {
+                    // Reset all layers
+                    geoJsonLayer.eachLayer(l => {
+                        geoJsonLayer.resetStyle(l);
+                    });
+
+                    // Highlight the clicked layer
+                    layer.setStyle({
+                        color: '#000000',
+                        weight: 2,
+                        opacity: 0.5,
+                        fillOpacity: 0.5,
+                        fillColor: '#ff7800'
+                    });
+
+                    // Display minerals in the bottom box
+                    displayMineralsForCounty(countyName);
+                });
+            }
+        }, highlightGoldCounties);
+    }
+
+    showCounties(); // Show counties layer
+
+    let csvData = []; // Store CSV data to access later
+
+    fetch('mineral to county 3.csv')
+        .then(response => response.text())
+        .then(data => {
+            csvData = data.split('\n').map(row => row.split(','));
+
+            let column0Html = '';
+
+            csvData.forEach(row => {
+                if (row.length > 1) {
+                    const column0 = row[0].trim();
+                    const column1 = row[1].trim();
+                    column0Html += `<div><a href="#" data-index="${csvData.indexOf(row)}" data-url="${column1}">${column0}</a></div>\n`;
+                }
+            });
+
+            document.getElementById('fileContent').innerHTML = column0Html.trim();
+
+            document.querySelectorAll('#fileContent a').forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const url = this.getAttribute('data-url');
+                    const index = this.getAttribute('data-index');
+                    const bottomBox = document.querySelector('.centerBottomBox');
+
+                    const selectedRow = csvData[index];
+                    const remainingFields = selectedRow.slice(2).filter(field => field.trim());
+                    const remainingFieldsHtml = remainingFields.join(', ');
+                    bottomBox.textContent = remainingFieldsHtml;
+
+                    const countyNames = remainingFields;
+                    highlightCounties(countyNames);
+
+                    // Update the #wikipediaButton text content and link
+                    const wikipediaButton = document.getElementById('wikipediaButton');
+                    wikipediaButton.textContent = selectedRow[0];
+                    wikipediaButton.href = url;
+                });
+            });
+        })
+        .catch(error => {
+            document.getElementById('fileContent').textContent = 'Error loading file: ' + error;
+        });
+
+    function highlightCounties(countyNames) {
+        if (!geoJsonLayer) return;
+
+        geoJsonLayer.eachLayer(layer => {
+            if (countyNames.includes(layer.feature.properties.NAME)) {
+                layer.setStyle({
+                    color: '#000000',
+                    weight: 2,
+                    opacity: 0.5,
+                    fillOpacity: 0.5,
+                    fillColor: '#ff7800'
+                });
+            } else {
+                geoJsonLayer.resetStyle(layer);
+            }
+        });
+    }
+
+    let countyToMineralData = []; // Store county to mineral CSV data
+
+    fetch('county to mineral New.csv')
+        .then(response => response.text())
+        .then(data => {
+            countyToMineralData = data.split('\n').map(row => row.split(','));
+        })
+        .catch(error => {
+            console.error('Error loading county to mineral CSV:', error);
+        });
+
+    function displayMineralsForCounty(countyName) {
+        const bottomBox = document.querySelector('.centerBottomBox');
+        const minerals = [];
+
+        countyToMineralData.forEach(row => {
+            if (row[0].trim() === countyName) {
+                minerals.push(...row.slice(1).map(mineral => mineral.trim()).filter(mineral => mineral));
+            }
+        });
+
+        const mineralsHtml = minerals.map(mineral => 
+            `<a href="#" class="mineral-link" data-mineral="${mineral}" target="_blank">${mineral}</a>`
+        ).join(', ');
+        bottomBox.innerHTML = mineralsHtml;
+
+        document.querySelectorAll('.mineral-link').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const mineralName = this.getAttribute('data-mineral');
+                displayMineralDetails(mineralName);
+            });
+        });
+    }
+
+    function fetchWikipediaContent(url) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const pages = data.query.pages;
+                const page = Object.values(pages)[0];
+
+                const extract = page.extract || 'Content not available';
+                const pageUrl = `https://en.wikipedia.org/wiki/${page.title}`;
+
+                document.getElementById('wikiContent').innerHTML = extract;
+                document.getElementById('wikipediaButton').textContent = 'Read more on Wikipedia';
+                document.getElementById('wikipediaButton').href = pageUrl;
+            })
+            .catch(error => {
+                console.error('Error fetching Wikipedia content:', error);
+            });
+    }
+
+    // New function to highlight counties where gold has been found after GeoJSON data is loaded
+    function highlightGoldCounties() {
+        const goldLink = Array.from(document.querySelectorAll('#fileContent a')).find(link => link.textContent === 'Gold');
+        if (goldLink) {
+            goldLink.click();
+        }
+    }
+</script>
+
+</body>
+</html>
