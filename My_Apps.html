@@ -17,6 +17,8 @@
             text-align: center;
             color: #333;
             font-size: 36px;
+            margin-top: 20px; /* Added margin to separate title from navbar */
+            margin-bottom: 20px; /* Reduced bottom margin for better balance */
         }
 
         .content {
@@ -32,6 +34,10 @@
             text-decoration: none;
             font-size: 18px;
             border-radius: 5px;
+            text-align: center; /* Center the text and image */
+            transition: background-color 0.3s ease; /* Smooth hover transition */
+            max-width: 400px; /* Limit the width of the button */
+            margin: 0px auto; /* Center the button and provide margin */
         }
 
         a:hover {
@@ -45,12 +51,25 @@
             margin-top: 20px;
         }
 
-        /* Make the image bigger */
+        /* Make the image and text fit together */
+        .image-link {
+            display: flex;
+            flex-direction: column; /* Stack the text and image vertically */
+            align-items: center; /* Center align both image and text */
+            justify-content: center;
+        }
+
         .image-link img {
-            width: 600px;
+            width: 100%; /* Adjust image width */
+            max-width: 420px; /* Increase image size by 40% (previously 300px) */
             height: auto;
             cursor: pointer;
-            max-width: 100%; /* Ensure image doesn't overflow */
+        }
+
+        .image-link span {
+            font-size: 18px;
+            color: white;
+            margin-top: 10px; /* Add space between image and text */
         }
 
         /* Mobile Responsiveness */
@@ -105,10 +124,16 @@
 
     <h1>Welcome to My Apps</h1>
     <div class="content">
-        <p><a href="minerals.html" target="_blank">Mineral locator for the state of Michigan</a></p>
-        <!-- Image link to Mineral Finder -->
+        <!-- Single button for Mineral Locator -->
         <a href="minerals.html" class="image-link" target="_blank">
             <img src="Mineral Finder.png" alt="Mineral Finder">
+            <span>Mineral Locator for Michigan</span>
+        </a>
+
+        <!-- Single button for Chemical Visualizer -->
+        <a href="ChemicalVisualization.HTML" class="image-link" target="_blank">
+            <img src="Chemical Visualizer.png" alt="Chemical Visualizer">
+            <span>Chemical Visualizer</span>
         </a>
     </div>
 </body>
