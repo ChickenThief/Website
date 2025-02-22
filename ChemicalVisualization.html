@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chemical Visualizer</title>
+  <link rel="stylesheet" href="ChemicalVisualization.css">  <!-- Updated CSS file name -->
+  <!-- Include SmilesDrawer from a CDN -->
+  <script src="https://unpkg.com/smiles-drawer@2.0.3/dist/smiles-drawer.min.js"></script>
+</head>
+<body>
+  <!-- Navbar dynamically loaded here -->
+  <div id="navbar-container"></div>
+  <script>
+    fetch('/navbar.html') 
+      .then(response => response.text())
+      .then(data => document.getElementById('navbar-container').innerHTML = data);
+  </script>
+
+  <div class="container">
+    <h1>Chemical Visualizer</h1>
+    <input type="text" id="chemicalFormula" placeholder="Enter chemical formula or IUPAC name (e.g., C6H6)">
+    <button onclick="renderMolecule()">Visualize</button>
+    <div class="canvas-container">
+      <canvas id="moleculeCanvas" width="400" height="400"></canvas>
+    </div>
+  </div>
+
+  <!-- Description section at the bottom, centered -->
+  <div class="description">
+    <p>
+      This web app allows users to input chemical names or formulas. It then uses PubChem's API to retrieve the corresponding SMILES notation for the molecule. The SMILES string is then rendered as a 2D visual representation using the SmilesDrawer JavaScript module.
+    </p>
+  </div>
+
+  <script src="ChemicalVisualization.js"></script>  <!-- Updated JS file name -->
+</body>
+</html>
